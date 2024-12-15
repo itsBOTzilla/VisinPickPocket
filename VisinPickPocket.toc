@@ -1,0 +1,12 @@
+## Interface: 11306
+## Title: Visin's Pick Pocketer
+## Notes: Tracks items pickpocketed during a session
+## Author: Visin-Doomhowl
+## Version: 1.0
+## Dependencies: 
+## SavedVariables: PickPocketTrackerDB
+
+
+Libs/Ace3/Ace3.lua
+VisinPickPocket.lua
+VisinPickPocketOptions.lua
