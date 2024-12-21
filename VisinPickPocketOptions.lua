@@ -5,6 +5,22 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 -- Initialize the database for settings if it doesn't exist
 PickPocketTrackerDB = PickPocketTrackerDB or { showMsg = true }
 
+-- Function to generate a unique number of spaces between 1 and 12 (ensures no repetition)
+local spaceVariations = {}
+local function GenerateUniqueSpaces()
+    local numSpaces = math.random(1, 12)
+    
+    -- Check if the number of spaces has already been used
+    while spaceVariations[numSpaces] do
+        numSpaces = math.random(1, 12)  -- Generate again if the space variation has already been used
+    end
+    
+    -- Mark this space variation as used
+    spaceVariations[numSpaces] = true
+    
+    return string.rep(" ", numSpaces)  -- Return the string with the unique number of spaces
+end
+
 -- Function to create the rogue macros
 local function CreateRogueMacros()
     local abilities = {
@@ -17,7 +33,7 @@ local function CreateRogueMacros()
     }
 
     for _, ability in ipairs(abilities) do
-        local macroName = " "  -- Use a fixed macro name (space)
+        local macroName = GenerateUniqueSpaces()  -- Generate a unique variation of spaces
         local macroContent = string.format(
             "#showtooltip %s\n/cast Pick Pocket\n/cast %s",
             ability.name,
