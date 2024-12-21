@@ -1,5 +1,5 @@
 ## Interface: 11306
-## Title: Visin's Pick Pocketer
+## Title: Visin's Pick Pocketing
 ## Notes: Tracks money pick pocketed during a session and lifetime.
 ## Author: Visin-Doomhowl
 ## Version: 1.0
