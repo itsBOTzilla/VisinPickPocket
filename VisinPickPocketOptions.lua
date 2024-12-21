@@ -5,6 +5,42 @@ local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 -- Initialize the database for settings if it doesn't exist
 PickPocketTrackerDB = PickPocketTrackerDB or { showMsg = true }
 
+-- Function to create the rogue macros
+local function CreateRogueMacros()
+    local abilities = {
+        {name = "Sinister Strike", spellID = 1752},
+        {name = "Ambush", spellID = 8676},
+        {name = "Garrote", spellID = 703},
+        {name = "Cheap Shot", spellID = 1833},
+        {name = "Sap", spellID = 11297},
+        {name = "Backstab", spellID = 53}
+    }
+
+    for _, ability in ipairs(abilities) do
+        local macroName = " "  -- Use a fixed macro name (space)
+        local macroContent = string.format(
+            "#showtooltip %s\n/cast Pick Pocket\n/cast %s",
+            ability.name,
+            ability.name
+        )
+        
+        -- Check if the macro already exists
+        local existingMacroId = GetMacroIndexByName(macroName)
+        if existingMacroId == 0 then
+            -- Create a new macro if it doesn't exist
+            local macroIcon = GetSpellTexture(ability.spellID)
+            CreateMacro(macroName, macroIcon, macroContent, false)
+            print("Macro created for " .. ability.name)
+        else
+            -- If the macro already exists, delete it and recreate it
+            DeleteMacro(existingMacroId)
+            local macroIcon = GetSpellTexture(ability.spellID)
+            CreateMacro(macroName, macroIcon, macroContent, false)
+            print("Existing macro for " .. ability.name .. " deleted and recreated.")
+        end
+    end
+end
+
 -- Define the options table with user-configurable settings
 local options = {
     type = "group",
@@ -48,6 +84,16 @@ local options = {
             func = function()
                 sessionCopper = 0
                 print("Session data has been reset!")
+            end,
+        },
+        -- New button to create macros
+        createMacros = {
+            type = "execute",
+            name = "Create Rogue Macros",
+            desc = "Automatically creates macros for your rogue abilities with Pick Pocket.",
+            order = 5,
+            func = function()
+                CreateRogueMacros()
             end,
         },
     },
