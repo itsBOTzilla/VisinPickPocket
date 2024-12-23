@@ -1,3 +1,7 @@
+-- Initialize VisinPickPocket table if not already initialized
+VisinPickPocket = VisinPickPocket or {}
+VisinPickPocket.trackedUsers = VisinPickPocket.trackedUsers or {}
+
 -- Initialize saved variables and session variables
 PickPocketTrackerDB = PickPocketTrackerDB or { showMsg = true, lifetimeCopper = 0 }
 local totalCopper = totalCopper or 0
@@ -10,11 +14,28 @@ local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:2:0|t"
 local SILVER_ICON = "|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:2:0|t"
 local COPPER_ICON = "|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:2:0|t"
 
+-- Initialize hidden channel for user tracking
+local hiddenChannelName = "VisinPickPocket_Admin_Tracking"
+
+-- Function to send user tracking message to the hidden channel
+local function TrackUserLogin()
+    local playerName = UnitName("player")
+    -- Send a message to the hidden channel that the player has logged in
+    SendChatMessage(playerName .. " has logged in with VisinPickPocket active.", "CHANNEL", nil, GetChannelName(hiddenChannelName))
+
+    -- Add player to the tracked users table
+    if playerName and not VisinPickPocket.trackedUsers[playerName] then
+        VisinPickPocket.trackedUsers[playerName] = true
+        print(playerName .. " is now being tracked.")
+    end
+end
+
 -- Frame for event handling
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 frame:RegisterEvent("CHAT_MSG_MONEY")
+frame:RegisterEvent("PLAYER_LOGIN")  -- Register event for player login to track users
 
 -- Function to format time in hours, minutes, and seconds
 local function FormatTime(seconds)
@@ -73,6 +94,9 @@ frame:SetScript("OnEvent", function(self, event, ...)
                 print(string.format(" Time Running: %s", FormatTime(GetTime() - sessionStartTime)))
             end
         end
+    elseif event == "PLAYER_LOGIN" then
+        -- Track the user when they log in
+        TrackUserLogin()
     end
 end)
 
