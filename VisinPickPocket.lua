@@ -1,12 +1,9 @@
--- Initialize saved variables for user tracking
-PickPocketTrackerDB = PickPocketTrackerDB or { lifetimeCopper = 0 }
+-- Initialize saved variables and session variables
+PickPocketTrackerDB = PickPocketTrackerDB or { showMsg = true, lifetimeCopper = 0 }
 local totalCopper = totalCopper or 0
 local sessionCopper = 0
 local isPickPocketLoot = false
 local sessionStartTime = 0
-
--- Track online users
-local onlineUsers = {}
 
 -- Currency icons
 local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:2:0|t"
@@ -18,7 +15,6 @@ local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
 frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 frame:RegisterEvent("CHAT_MSG_MONEY")
-frame:RegisterEvent("CHAT_MSG_CHANNEL")  -- For detecting users in the hidden channel
 
 -- Function to format time in hours, minutes, and seconds
 local function FormatTime(seconds)
@@ -30,35 +26,10 @@ end
 
 -- Function to format money with icons (properly rounded)
 local function FormatMoney(copper)
-    local gold = math.floor(copper / 10000)
-    local silver = math.floor((copper % 10000) / 100)
-    local copperRemaining = copper % 100
+    local gold = math.floor(copper / 10000)           -- Convert copper to gold
+    local silver = math.floor((copper % 10000) / 100)  -- Convert remaining copper to silver
+    local copperRemaining = copper % 100              -- Remaining copper
     return string.format("%d%s %d%s %d%s", gold, GOLD_ICON, silver, SILVER_ICON, copperRemaining, COPPER_ICON)
-end
-
--- Function to join the hidden channel
-local function JoinHiddenChannel()
-    local channelName = "VisinPickPocketAdmin"
-    local channelId = GetChannelName(channelName)
-    
-    if channelId == 0 then
-        -- If the channel isn't joined, join it
-        JoinChannelByName(channelName)
-    end
-end
-
--- Function to detect online users in the channel
-local function TrackOnlineUsers(message, sender, _, _, _, _, _, _, channelID)
-    local hiddenChannelID = GetChannelName("VisinPickPocketAdmin")
-
-    -- Check if the message is from the hidden channel (with the correct channel ID)
-    if channelID == hiddenChannelID then
-        -- If the sender is not already tracked, add them
-        if not onlineUsers[sender] then
-            onlineUsers[sender] = true
-            print(sender .. " has joined the hidden channel.")
-        end
-    end
 end
 
 -- Event handler
@@ -67,8 +38,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
         local addonName = ...
         if addonName == "VisinPickPocket" then
             sessionStartTime = GetTime() -- Use GetTime() for more accurate time tracking
-            JoinHiddenChannel()  -- Ensure the hidden channel is joined
-            print("|cffffff00Visin's |cff00ffffPick |cff00ff00Pocketing |cff808080Loaded!|r")
+            print("|cffffff00Visin's |cff00ffffPick |cff00ff00Pocketing |cff808080Loaded!|r")  -- Yellow Teal Green
         end
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unitTag, _, spellID = ...
@@ -103,9 +73,6 @@ frame:SetScript("OnEvent", function(self, event, ...)
                 print(string.format(" Time Running: %s", FormatTime(GetTime() - sessionStartTime)))
             end
         end
-    elseif event == "CHAT_MSG_CHANNEL" then
-        -- Track online users in the hidden channel
-        TrackOnlineUsers(...)
     end
 end)
 
